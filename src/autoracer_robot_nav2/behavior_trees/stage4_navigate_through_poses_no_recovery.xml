@@ -1,0 +1,14 @@
+<!--
+  Stage 4 Ackermann navigation through poses without Spin, BackUp, or DriveOnHeading.
+  Those recovery behaviors are not valid for the physical Ackermann chassis.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="NavigateThroughPosesNoRecovery">
+      <RateController hz="1.0">
+        <ComputePathThroughPoses goals="{goals}" path="{path}" planner_id="GridBased"/>
+      </RateController>
+      <FollowPath path="{path}" controller_id="FollowPath"/>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>

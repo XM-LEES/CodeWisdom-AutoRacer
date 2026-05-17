@@ -1,0 +1,15 @@
+<!--
+  Stage 4 Ackermann NavigateToPose without Spin, BackUp, DriveOnHeading, or periodic replanning.
+  The path is recomputed only when the goal changes, avoiding short-goal interruption from planner
+  action handshake timeouts while the controller is already following a valid path.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="NavigateToPoseGoalUpdateOnly">
+      <GoalUpdatedController>
+        <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+      </GoalUpdatedController>
+      <FollowPath path="{path}" controller_id="FollowPath"/>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>

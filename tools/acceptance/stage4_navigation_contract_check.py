@@ -52,10 +52,17 @@ def check_stage4_launch(repo_root: Path) -> None:
         "robot_description.launch.py": "stage4 launch must include URDF/TF launch",
         "lslidar_cx_launch.py": "stage4 launch must include LiDAR launch",
         "stage4_nav2_params.yaml": "stage4 launch must default to stable stage4 params",
+        "DeclareLaunchArgument('use_composition', default_value='False')": "stage4 live launch must default to non-composed Nav2 for lifecycle/action observability",
         "nav2_bringup": "stage4 launch must include Nav2 bringup",
         "localization_launch.py": "stage4 launch must include localization",
         "navigation_launch.py": "stage4 launch must include navigation",
         "SetRemap(src='cmd_vel', dst='/nav2_cmd_vel')": "Nav2 cmd_vel must be isolated to /nav2_cmd_vel",
+        "navigation_nodes = GroupAction": "stage4 must define non-composed Nav2 nodes with explicit remaps",
+        "('cmd_vel', 'cmd_vel_nav')": "Nav2 motion outputs must feed velocity_smoother through cmd_vel_nav",
+        "('cmd_vel_smoothed', '/nav2_cmd_vel')": "velocity_smoother output must feed Collision Monitor through /nav2_cmd_vel",
+        "ParameterFile(": "stage4 custom Nav2 nodes must allow parameter substitutions",
+        "RewrittenYaml(": "stage4 custom Nav2 nodes must rewrite launch substitutions into params",
+        "SetRemap(src='cmd_vel', dst='/stage4_legacy_cmd_vel_disabled')": "stage4 must disable chassis bridge legacy /cmd_vel subscription",
         "nav2_collision_monitor": "stage4 launch must start Collision Monitor",
         "lifecycle_manager_collision_monitor": "Collision Monitor must be lifecycle managed",
         "twist_to_ackermann": "stage4 launch must start adapter",
@@ -74,6 +81,11 @@ def check_stage4_launch(repo_root: Path) -> None:
     }
     for needle, detail in required.items():
         require_text(text, needle, detail)
+
+    if text.count("('cmd_vel', 'cmd_vel_nav')") < 2:
+        raise AssertionError(
+            "controller_server and behavior_server must both remap cmd_vel to cmd_vel_nav"
+        )
 
 
 def check_robot_description_tf(repo_root: Path) -> None:
@@ -96,7 +108,13 @@ def check_nav2_params(repo_root: Path) -> None:
     text = params.read_text(encoding="utf-8")
 
     required = {
+        'default_nav_to_pose_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_to_pose_goal_update_only.xml"': "stage4A must use a no-recovery NavigateToPose behavior tree",
+        'default_nav_through_poses_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_through_poses_no_recovery.xml"': "stage4A must use local no-recovery NavigateThroughPoses behavior tree",
         'plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"': "controller must be RPP",
+        "xy_goal_tolerance: 0.35": "stage4A goal tolerance must match measured Ackermann localization accuracy",
+        "desired_linear_vel: 0.50": "stage4A target navigation speed must be 0.50 m/s",
+        "min_approach_linear_velocity: 0.18": "stage4A approach speed floor must stay above measured chassis crawl-stall region",
+        "regulated_linear_scaling_min_speed: 0.18": "stage4A regulated scaling speed floor must stay above measured chassis crawl-stall region",
         "allow_reversing: false": "stage4A must disable reversing",
         "use_rotate_to_heading: false": "RPP rotate-to-heading must be disabled for Ackermann",
         'plugin: "nav2_smac_planner/SmacPlannerHybrid"': "planner must be Smac Hybrid-A*",
@@ -104,6 +122,7 @@ def check_nav2_params(repo_root: Path) -> None:
         "minimum_turning_radius: 2.24": "minimum turning radius must be 2.24 m",
         "cmd_vel_in_topic: \"/nav2_cmd_vel\"": "Collision Monitor input topic mismatch",
         "cmd_vel_out_topic: \"/safe_nav2_cmd_vel\"": "Collision Monitor output topic mismatch",
+        "max_velocity: [0.50, 0.0, 0.60]": "stage4A velocity smoother must allow 0.50 m/s forward speed",
         "enable_stamped_cmd_vel: false": "Collision Monitor must use Twist for Humble adapter chain",
         "front_stop": "front stop zone missing",
         "front_slowdown": "front slowdown zone missing",
@@ -120,6 +139,76 @@ def check_nav2_params(repo_root: Path) -> None:
 
     require("nav2_mppi_controller::MPPIController" not in text, "stage4 stable params must not use MPPI")
     require('action_type: "limit"' not in text, "ROS2 Humble baseline must not use Collision Monitor limit action")
+    require("navigate_to_pose_w_replanning_and_recovery.xml" not in text, "stage4A must not load Spin/BackUp recovery tree")
+    require("navigate_through_poses_w_replanning_and_recovery.xml" not in text, "stage4A must not load Spin/BackUp recovery tree")
+
+
+def check_nav2_reverse_params(repo_root: Path) -> None:
+    params = repo_root / "src" / "autoracer_robot_nav2" / "param" / "stage4_nav2_reverse_params.yaml"
+    text = params.read_text(encoding="utf-8")
+
+    required = {
+        'default_nav_to_pose_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_to_pose_goal_update_only.xml"': "4B must use a no-recovery NavigateToPose behavior tree",
+        'default_nav_through_poses_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_through_poses_no_recovery.xml"': "4B must use local no-recovery NavigateThroughPoses behavior tree",
+        'plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"': "4B controller must be RPP",
+        "xy_goal_tolerance: 0.35": "4B goal tolerance must match measured Ackermann localization accuracy",
+        "desired_linear_vel: 0.50": "4B target navigation speed must be 0.50 m/s",
+        "min_approach_linear_velocity: 0.18": "4B approach speed floor must stay above measured chassis crawl-stall region",
+        "regulated_linear_scaling_min_speed: 0.18": "4B regulated scaling speed floor must stay above measured chassis crawl-stall region",
+        "allow_reversing: true": "4B RPP must explicitly allow controlled reversing",
+        "use_rotate_to_heading: false": "4B must still disable rotate-to-heading for Ackermann",
+        'plugin: "nav2_smac_planner/SmacPlannerHybrid"': "4B planner must be Smac Hybrid-A*",
+        'motion_model_for_search: "REEDS_SHEPP"': "4B planner must use REEDS_SHEPP for controlled reverse segments",
+        "minimum_turning_radius: 2.24": "4B minimum turning radius must stay at 2.24 m",
+        "max_velocity: [0.50, 0.0, 0.60]": "4B velocity smoother must allow 0.50 m/s forward speed",
+        "min_velocity: [-0.30, 0.0, -0.60]": "4B velocity smoother must allow conservative reverse vx",
+        "cmd_vel_in_topic: \"/nav2_cmd_vel\"": "4B Collision Monitor input topic mismatch",
+        "cmd_vel_out_topic: \"/safe_nav2_cmd_vel\"": "4B Collision Monitor output topic mismatch",
+        "front_stop": "4B front stop zone missing",
+        "front_slowdown": "4B front slowdown zone missing",
+        "rear_stop": "4B rear stop zone missing",
+        "rear_slowdown": "4B rear slowdown zone missing",
+        "left_side_stop": "4B left side stop zone missing",
+        "right_side_stop": "4B right side stop zone missing",
+        "observation_sources: [\"scan\"]": "4B Collision Monitor must use /scan observation source",
+        "topic: \"/scan\"": "4B Collision Monitor scan source must use /scan",
+    }
+    for needle, detail in required.items():
+        require_text(text, needle, detail)
+
+    require("nav2_mppi_controller::MPPIController" not in text, "4B params must not switch to MPPI")
+    require('action_type: "limit"' not in text, "ROS2 Humble baseline must not use Collision Monitor limit action")
+    require("navigate_to_pose_w_replanning_and_recovery.xml" not in text, "4B must not load Spin/BackUp recovery tree")
+    require("navigate_through_poses_w_replanning_and_recovery.xml" not in text, "4B must not load Spin/BackUp recovery tree")
+
+
+def check_behavior_trees(repo_root: Path) -> None:
+    cmake = repo_root / "src" / "autoracer_robot_nav2" / "CMakeLists.txt"
+    cmake_text = cmake.read_text(encoding="utf-8")
+    require_text(cmake_text, "behavior_trees", "autoracer_robot_nav2 must install behavior_trees directory")
+
+    nav_to_pose_bt = repo_root / "src" / "autoracer_robot_nav2" / "behavior_trees" / "stage4_navigate_to_pose_goal_update_only.xml"
+    nav_to_pose_text = nav_to_pose_bt.read_text(encoding="utf-8")
+    for needle, detail in {
+        "GoalUpdatedController": "NavigateToPose tree must avoid periodic replanning",
+        "ComputePathToPose": "NavigateToPose tree must compute an initial path",
+        "FollowPath": "NavigateToPose tree must follow the computed path",
+        "GridBased": "NavigateToPose tree must use the stage4 Smac planner id",
+    }.items():
+        require_text(nav_to_pose_text, needle, detail)
+    require("RateController" not in nav_to_pose_text, "NavigateToPose tree must not periodically replan during short stage4 goals")
+
+    bt = repo_root / "src" / "autoracer_robot_nav2" / "behavior_trees" / "stage4_navigate_through_poses_no_recovery.xml"
+    text = bt.read_text(encoding="utf-8")
+    for needle, detail in {
+        "ComputePathThroughPoses": "NavigateThroughPoses tree must compute a through-poses path",
+        "FollowPath": "NavigateThroughPoses tree must follow the computed path",
+        "GridBased": "NavigateThroughPoses tree must use the stage4 Smac planner id",
+    }.items():
+        require_text(text, needle, detail)
+    for tree_text in (nav_to_pose_text, text):
+        for forbidden in ("<Spin", "<BackUp", "<DriveOnHeading"):
+            require(forbidden not in tree_text, f"stage4 behavior tree must not contain {forbidden}")
 
 
 def check_adapter_math(repo_root: Path) -> None:
@@ -158,6 +247,11 @@ def check_adapter_math(repo_root: Path) -> None:
     require(math.isclose(reverse_limited.speed_mps, -0.60), "reverse clamp mismatch")
     require(reverse_limited.speed_limited, "reverse clamp must set speed_limited")
 
+    reverse_turn = adapter.compute_ackermann(-0.20, 0.10, reverse_config)
+    require(reverse_turn.reverse, "reverse turn must set reverse flag")
+    require(reverse_turn.stop_reason == adapter.STOP_REASON_NONE, "allowed reverse turn should not stop")
+    require(reverse_turn.steering_angle_rad < 0.0, "positive yaw while reversing requires negative steering")
+
 
 def check_adapter_diagnostics_contract(repo_root: Path) -> None:
     adapter = repo_root / "src" / "autoracer_robot_nav2" / "scripts" / "twist_to_ackermann.py"
@@ -190,6 +284,8 @@ def run_checks(repo_root: Path) -> list[CheckResult]:
         ("stage4_launch", lambda: check_stage4_launch(repo_root)),
         ("robot_description_tf", lambda: check_robot_description_tf(repo_root)),
         ("nav2_params", lambda: check_nav2_params(repo_root)),
+        ("nav2_reverse_params", lambda: check_nav2_reverse_params(repo_root)),
+        ("behavior_trees", lambda: check_behavior_trees(repo_root)),
         ("adapter_math", lambda: check_adapter_math(repo_root)),
         ("adapter_diagnostics_contract", lambda: check_adapter_diagnostics_contract(repo_root)),
     ]

@@ -1,6 +1,8 @@
-# Stage-4 stable Nav2 Ackermann configuration.
-# This file is the implementation target for
-# `autoracer_bringup/launch/stage4_navigation.launch.py`.
+# Stage-4B controlled-reverse Nav2 Ackermann configuration.
+# Use only with:
+#   stage4_navigation.launch.py params_file:=<this file> allow_reverse:=true
+# It keeps the same footprint, safety zones, topic isolation, and adapter
+# contract as stage4_nav2_params.yaml, but enables reverse planning/control.
 
 amcl:
   ros__parameters:
@@ -102,7 +104,7 @@ controller_server:
       regulated_linear_scaling_min_radius: 2.24
       regulated_linear_scaling_min_speed: 0.18
       use_rotate_to_heading: false
-      allow_reversing: false
+      allow_reversing: true
       rotate_to_heading_min_angle: 0.785
       max_angular_accel: 1.0
       max_robot_pose_search_dist: 3.0
@@ -216,7 +218,7 @@ planner_server:
       max_iterations: 1000000
       max_on_approach_iterations: 1000
       max_planning_time: 5.0
-      motion_model_for_search: "DUBIN"
+      motion_model_for_search: "REEDS_SHEPP"
       cost_travel_multiplier: 2.0
       angle_quantization_bins: 72
       analytic_expansion_ratio: 3.5
@@ -277,7 +279,7 @@ velocity_smoother:
     scale_velocities: false
     feedback: "OPEN_LOOP"
     max_velocity: [0.50, 0.0, 0.60]
-    min_velocity: [0.0, 0.0, -0.60]
+    min_velocity: [-0.30, 0.0, -0.60]
     max_accel: [0.5, 0.0, 1.0]
     max_decel: [-0.5, 0.0, -1.0]
     odom_topic: /odom

@@ -12,7 +12,7 @@
 | `stage2_path_fixture_check.py` | 阶段 2 path fixture 静态检查。确认 `straight_2m`、左右圆弧、S 弯和到点停车 fixture 格式正确。 | 不会 |
 | `stage2_tracker_fake_odom_check.py` | 阶段 2 tracker 离线检查。用 fixture 和 fake odom 验证 Pure Pursuit 输出方向、限幅、S 弯符号切换和到点停车。 | 不会 |
 | `stage3_mapping_contract_check.py` | 阶段 3 mapping 固定入口、必需输入门禁、`pointcloud_to_laserscan` 和 `slam_toolbox` 参数契约检查。 | 不会 |
-| `stage4_navigation_contract_check.py` | 阶段 4 fixed launch、必需输入门禁、Nav2 RPP/Smac/Collision Monitor 参数和 `twist_to_ackermann` adapter 离线契约检查。 | 不会 |
+| `stage4_navigation_contract_check.py` | 阶段 4 fixed launch、必需输入门禁、Nav2 RPP/Smac/Collision Monitor 参数、无 `Spin/BackUp` 行为树和 `twist_to_ackermann` adapter 离线契约检查。 | 不会 |
 | `fixtures/stage2_paths/*.json` | 阶段 2 tracker 的标准输入，语义等价于 `nav_msgs/Path`。 | 本地数据文件 |
 
 未实现工具的状态和启用时机以根仓库 `../docs/阶段路线图.md` 为准，不在本目录重复维护路线图。
@@ -89,7 +89,7 @@ python3 tools/acceptance/stage3_mapping_contract_check.py
 python3 tools/acceptance/stage4_navigation_contract_check.py
 ```
 
-这两个脚本只读取 launch、参数、adapter 源码和本地纯函数，不启动 ROS graph、不打开串口、不发布运动命令。
+这两个脚本只读取 launch、参数、行为树、adapter 源码和本地纯函数，不启动 ROS graph、不打开串口、不发布运动命令。
 脚本会检查固定入口是否具备必需输入门禁；真正的地图质量、日志落盘和 rosbag 内容仍以阶段验收记录为准。
 
 阶段 3 检查覆盖：
@@ -103,6 +103,8 @@ python3 tools/acceptance/stage4_navigation_contract_check.py
 
 - `stage4_navigation.launch.py` include IMU、URDF/TF、阶段 1、LiDAR、Nav2 localization/navigation、Collision Monitor 和 adapter。
 - `stage4_navigation.launch.py` 在启动底盘链路时拒绝空值或 `<=0` 的 `counts_per_meter`；启动 Nav2 时拒绝空地图或不存在的地图路径。
-- Nav2 controller 输出 remap 到 `/nav2_cmd_vel`，Collision Monitor 输出 `/safe_nav2_cmd_vel`，adapter 输出 `/ackermann_cmd`。
+- Nav2 controller 输出 remap 到 `cmd_vel_nav`，velocity smoother 输出 `/nav2_cmd_vel`，Collision Monitor 输出 `/safe_nav2_cmd_vel`，adapter 输出 `/ackermann_cmd`。
+- 阶段 4 行为树不加载 `Spin`、`BackUp` 或 `DriveOnHeading`，避免阿克曼车执行无效恢复动作。
 - `stage4_nav2_params.yaml` 使用 Smac Hybrid-A* `DUBIN`、RPP、Collision Monitor 默认安全区，不使用 MPPI。
-- `twist_to_ackermann` 离线检查速度/转角限幅、不可行原地旋转、NaN、倒车禁用和倒车限幅。
+- `stage4_nav2_reverse_params.yaml` 使用 Smac Hybrid-A* `REEDS_SHEPP`、RPP `allow_reversing=true`、保守倒车速度和后方/侧方安全区；该检查只证明 4B 不上车配置存在。
+- `twist_to_ackermann` 离线检查速度/转角限幅、不可行原地旋转、NaN、倒车禁用、倒车限幅和倒车转向符号。

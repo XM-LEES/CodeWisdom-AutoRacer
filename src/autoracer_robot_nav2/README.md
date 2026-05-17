@@ -8,6 +8,10 @@ Nav2 导航配置包，适配 AutoRacer Ackermann 转向平台。
 
 - Nav2 地图导航历史/过渡配置参考
 - Stage 4 稳定版 Nav2 参数 `param/stage4_nav2_params.yaml`
+- Stage 4B 受控倒车离线参数 `param/stage4_nav2_reverse_params.yaml`
+- Stage 4 无 `Spin/BackUp` 行为树：
+  - `behavior_trees/stage4_navigate_to_pose_goal_update_only.xml`
+  - `behavior_trees/stage4_navigate_through_poses_no_recovery.xml`
 - `twist_to_ackermann` adapter
 - 地图加载与保存
 - pointcloud_to_laserscan 集成
@@ -16,6 +20,8 @@ Nav2 导航配置包，适配 AutoRacer Ackermann 转向平台。
 阶段 4 稳定版使用 `param/stage4_nav2_params.yaml`，并以
 `CodeWisdom-AutoRacer/docs/启动与运行规范.md` 中的 AMCL + Smac Hybrid-A* + Regulated Pure Pursuit
 + Collision Monitor + `twist_to_ackermann` 链路为准。
+阶段 4 行为树不得加载 `Spin`、`BackUp` 或 `DriveOnHeading` 恢复动作。
+`NavigateToPose` 默认只在目标更新时重规划，避免短距离实车验收被运行中重规划 action 握手打断。
 
 ## 依赖
 
@@ -65,6 +71,18 @@ ros2 launch autoracer_robot_nav2 navigation.launch.py map:=/path/to/autoracer_ma
 ros2 launch autoracer_bringup stage4_navigation.launch.py map:=/path/to/map.yaml counts_per_meter:=<实测值>
 ```
 
+阶段 4B 受控倒车离线/上车候选入口：
+
+```bash
+ros2 launch autoracer_bringup stage4_navigation.launch.py \
+  map:=/path/to/map.yaml \
+  counts_per_meter:=<实测值> \
+  params_file:=$(ros2 pkg prefix autoracer_robot_nav2)/share/autoracer_robot_nav2/param/stage4_nav2_reverse_params.yaml \
+  allow_reverse:=true
+```
+
+该入口只证明 4B 配置链路存在；`reverse_plan_controlled` 上车 PASS 仍必须具备倒车路径、倒车限速、后方/侧方 Collision Monitor 安全区和人工安全确认。
+
 离线契约检查：
 
 ```bash
@@ -81,8 +99,11 @@ python3 tools/acceptance/stage4_navigation_contract_check.py
 | motion_model | Ackermann | 阶段 4A 通过 Smac Dubin + RPP + adapter 实现 forward-only |
 | planner | SmacPlannerHybrid | 阶段 4A 使用 Dubin/forward-only |
 | controller | Regulated Pure Pursuit | Nav2 内部输出 `/nav2_cmd_vel` |
+| goal_tolerance | `xy=0.35m`, `yaw=0.35rad` | 阶段 4A 当前实车容差 |
+| min_approach_speed | `0.18m/s` | 避免低速爬行区停车 |
 | adapter | `twist_to_ackermann` | `/safe_nav2_cmd_vel -> /ackermann_cmd` |
 | footprint | 0.8775m × 0.57m | 车身碰撞轮廓 |
+| stage4_reverse_params | `stage4_nav2_reverse_params.yaml` | 4B 候选，`REEDS_SHEPP` + RPP `allow_reversing=true` |
 
 ## 参考
 

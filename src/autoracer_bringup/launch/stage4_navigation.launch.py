@@ -10,8 +10,10 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node, SetRemap
+from launch_ros.descriptions import ParameterFile
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+from nav2_common.launch import RewrittenYaml
 
 
 def launch_bool(context, name):
@@ -68,6 +70,20 @@ def pointcloud_to_laserscan_node():
     )
 
 
+def nav2_started_when(use_composition):
+    return IfCondition(PythonExpression([
+        "'", LaunchConfiguration('start_nav2'), "'.lower() == 'true' and '",
+        use_composition, "'.lower() == 'true'",
+    ]))
+
+
+def nav2_not_composed_when(use_composition):
+    return IfCondition(PythonExpression([
+        "'", LaunchConfiguration('start_nav2'), "'.lower() == 'true' and '",
+        use_composition, "'.lower() != 'true'",
+    ]))
+
+
 def generate_launch_description():
     autoracer_nav_dir = Path(get_package_share_directory('autoracer_robot_nav2'))
     stage1_launch = Path(get_package_share_directory('autoracer_bringup')) / 'launch' / 'stage1_chassis.launch.py'
@@ -80,12 +96,30 @@ def generate_launch_description():
     use_composition = LaunchConfiguration('use_composition')
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
+    nav2_remappings = [('/tf', 'tf'), ('/tf_static', 'tf_static')]
+    navigation_lifecycle_nodes = [
+        'controller_server',
+        'smoother_server',
+        'planner_server',
+        'behavior_server',
+        'bt_navigator',
+        'waypoint_follower',
+        'velocity_smoother',
+    ]
+    configured_nav2_params = ParameterFile(
+        RewrittenYaml(
+            source_file=params_file,
+            param_rewrites={
+                'use_sim_time': use_sim_time,
+                'autostart': autostart,
+            },
+            convert_types=True,
+        ),
+        allow_substs=True,
+    )
 
     nav2_container = Node(
-        condition=IfCondition(PythonExpression([
-            "'", LaunchConfiguration('start_nav2'), "'.lower() == 'true' and '",
-            use_composition, "'.lower() == 'true'",
-        ])),
+        condition=nav2_started_when(use_composition),
         name='nav2_container',
         package='rclcpp_components',
         executable='component_container_isolated',
@@ -118,7 +152,7 @@ def generate_launch_description():
             'launch',
             'navigation_launch.py',
         ])),
-        condition=IfCondition(LaunchConfiguration('start_nav2')),
+        condition=nav2_started_when(use_composition),
         launch_arguments={
             'use_sim_time': use_sim_time,
             'autostart': autostart,
@@ -127,6 +161,104 @@ def generate_launch_description():
             'use_respawn': use_respawn,
             'container_name': 'nav2_container',
         }.items(),
+    )
+
+    navigation_nodes = GroupAction(
+        condition=nav2_not_composed_when(use_composition),
+        actions=[
+            Node(
+                package='nav2_controller',
+                executable='controller_server',
+                name='controller_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings + [('cmd_vel', 'cmd_vel_nav')],
+            ),
+            Node(
+                package='nav2_smoother',
+                executable='smoother_server',
+                name='smoother_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings,
+            ),
+            Node(
+                package='nav2_planner',
+                executable='planner_server',
+                name='planner_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings,
+            ),
+            Node(
+                package='nav2_behaviors',
+                executable='behavior_server',
+                name='behavior_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings + [('cmd_vel', 'cmd_vel_nav')],
+            ),
+            Node(
+                package='nav2_bt_navigator',
+                executable='bt_navigator',
+                name='bt_navigator',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings,
+            ),
+            Node(
+                package='nav2_waypoint_follower',
+                executable='waypoint_follower',
+                name='waypoint_follower',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings,
+            ),
+            Node(
+                package='nav2_velocity_smoother',
+                executable='velocity_smoother',
+                name='velocity_smoother',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_nav2_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=nav2_remappings + [
+                    ('cmd_vel', 'cmd_vel_nav'),
+                    ('cmd_vel_smoothed', '/nav2_cmd_vel'),
+                ],
+            ),
+            Node(
+                package='nav2_lifecycle_manager',
+                executable='lifecycle_manager',
+                name='lifecycle_manager_navigation',
+                output='screen',
+                arguments=['--ros-args', '--log-level', log_level],
+                parameters=[{
+                    'use_sim_time': use_sim_time,
+                    'autostart': autostart,
+                    'node_names': navigation_lifecycle_nodes,
+                }],
+            ),
+        ],
     )
 
     collision_monitor = Node(
@@ -190,7 +322,7 @@ def generate_launch_description():
         DeclareLaunchArgument('params_file', default_value=str(autoracer_nav_dir / 'param' / 'stage4_nav2_params.yaml'), description='Stage-4 Nav2 Ackermann params'),
         DeclareLaunchArgument('use_sim_time', default_value='false'),
         DeclareLaunchArgument('autostart', default_value='true'),
-        DeclareLaunchArgument('use_composition', default_value='True'),
+        DeclareLaunchArgument('use_composition', default_value='False'),
         DeclareLaunchArgument('use_respawn', default_value='False'),
         DeclareLaunchArgument('use_rviz', default_value='true'),
         DeclareLaunchArgument('log_level', default_value='info'),
@@ -240,16 +372,19 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(str(robot_description_launch)),
             condition=IfCondition(LaunchConfiguration('start_robot_description')),
         ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(str(stage1_launch)),
-            condition=IfCondition(LaunchConfiguration('start_chassis')),
-            launch_arguments={
-                'usart_port_name': LaunchConfiguration('usart_port_name'),
-                'serial_baud_rate': LaunchConfiguration('serial_baud_rate'),
-                'counts_per_meter': LaunchConfiguration('counts_per_meter'),
-                'use_ekf': LaunchConfiguration('use_ekf'),
-            }.items(),
-        ),
+        GroupAction([
+            SetRemap(src='cmd_vel', dst='/stage4_legacy_cmd_vel_disabled'),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(str(stage1_launch)),
+                condition=IfCondition(LaunchConfiguration('start_chassis')),
+                launch_arguments={
+                    'usart_port_name': LaunchConfiguration('usart_port_name'),
+                    'serial_baud_rate': LaunchConfiguration('serial_baud_rate'),
+                    'counts_per_meter': LaunchConfiguration('counts_per_meter'),
+                    'use_ekf': LaunchConfiguration('use_ekf'),
+                }.items(),
+            ),
+        ]),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(PathJoinSubstitution([
                 FindPackageShare('lslidar_driver'),
@@ -265,6 +400,7 @@ def generate_launch_description():
             localization_launch,
             navigation_launch,
         ]),
+        navigation_nodes,
         collision_monitor,
         collision_lifecycle_manager,
         adapter,
