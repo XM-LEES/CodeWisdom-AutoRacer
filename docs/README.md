@@ -11,6 +11,8 @@
 | `test-records/` | 阶段验收记录模板和可提交证据摘要 |
 | `../tools/` | 上位机辅助工具索引 |
 | `../tools/acceptance/` | 阶段 1 离线/在线检查脚本、阶段 2 path fixture 检查脚本和 fake odom 检查入口 |
+| `../tools/runtime/autoracer.sh` | 最终建图/导航运行入口，默认启动前检查，`nav` 默认伴生只读采集 |
+| `../tools/diagnostics/nav_capture.py` | 导航会话只读采集和 abort 分层摘要工具 |
 
 ## 归档资料
 

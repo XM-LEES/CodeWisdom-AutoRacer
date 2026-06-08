@@ -7,5 +7,7 @@
 | 路径 | 作用 |
 | --- | --- |
 | `acceptance/` | 阶段验收工具和 fixture。当前覆盖阶段 1 最小验收检查、阶段 2 path fixture 检查和 fake odom 检查入口。 |
+| `runtime/` | 最终现场运行脚本。`autoracer.sh` 只暴露 `map` 建图和 `nav` 导航两个任务，默认先做启动前检查，`nav` 默认伴生只读采集。 |
+| `diagnostics/` | 只读诊断采集工具。`nav_capture.py` 记录导航会话并生成 abort 分层摘要。 |
 
 系统级验收规则见根仓库 `../docs/阶段路线图.md` 和 `../docs/开发流程与验证规范.md`。

@@ -1,0 +1,290 @@
+{
+  "ackermann_nonzero_observed": true,
+  "bag_path": "/home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/docs/test-records/artifacts/2026-05-20-nav-163754/rosbags/2026-05-20-nav-163754",
+  "capture_mode": "session",
+  "chassis_motion_observed": true,
+  "chassis_safety_observed": {
+    "brake_active": true,
+    "command_timeout": true,
+    "estop_active": false,
+    "rc_override_active": true
+  },
+  "created_at": "2026-05-20T16:42:40",
+  "evidence": [
+    "progress checker failure appears in /rosout"
+  ],
+  "first_failed_layer": "controller",
+  "goal_events": [
+    {
+      "goal_id": "64779550b3a6c99c61a1a22e416594e9",
+      "sec": 35.541680181000004,
+      "status": "executing",
+      "status_code": 2
+    },
+    {
+      "goal_id": "64779550b3a6c99c61a1a22e416594e9",
+      "sec": 53.462597551,
+      "status": "aborted",
+      "status_code": 6
+    },
+    {
+      "goal_id": "c62d4cea0b3dbf8dd835f4636e2ce4db",
+      "sec": 119.29989237900001,
+      "status": "executing",
+      "status_code": 2
+    },
+    {
+      "goal_id": "c62d4cea0b3dbf8dd835f4636e2ce4db",
+      "sec": 179.340502036,
+      "status": "aborted",
+      "status_code": 6
+    },
+    {
+      "goal_id": "5a5cf75ba93d2d6c024298ed8aabc7e8",
+      "sec": 224.12357228500002,
+      "status": "executing",
+      "status_code": 2
+    },
+    {
+      "goal_id": "5a5cf75ba93d2d6c024298ed8aabc7e8",
+      "sec": 262.25203168900003,
+      "status": "aborted",
+      "status_code": 6
+    }
+  ],
+  "key_rosout_tail": [
+    {
+      "level": 30,
+      "message": "Failed to transform initial pose in time (Lookup would require extrapolation into the future.  Requested time 1779266483.495552 but the latest data is at time 1779266483.461775, when looking up transform from frame [base_footprint] to frame [odom])",
+      "name": "amcl",
+      "sec": 205.38123436900003
+    },
+    {
+      "level": 20,
+      "message": "Received a goal, begin computing control effort.",
+      "name": "controller_server",
+      "sec": 224.194542689
+    },
+    {
+      "level": 20,
+      "message": "Destroying bond (collision_monitor) to lifecycle manager.",
+      "name": "collision_monitor",
+      "sec": 262.227185645
+    },
+    {
+      "level": 30,
+      "message": "[navigate_to_pose] [ActionServer] Requested to deactivate server but goal is still executing. Should check if action server is running before deactivating.",
+      "name": "bt_navigator",
+      "sec": 262.229844758
+    },
+    {
+      "level": 20,
+      "message": "Running Nav2 LifecycleManager rcl preshutdown (lifecycle_manager_collision_monitor)",
+      "name": "lifecycle_manager_collision_monitor",
+      "sec": 262.232790607
+    },
+    {
+      "level": 20,
+      "message": "[follow_path] [ActionServer] Client requested to cancel the goal. Cancelling.",
+      "name": "controller_server",
+      "sec": 262.248040343
+    },
+    {
+      "level": 30,
+      "message": "[navigate_to_pose] [ActionServer] Aborting handle.",
+      "name": "bt_navigator",
+      "sec": 262.251602322
+    },
+    {
+      "level": 20,
+      "message": "Goal canceled",
+      "name": "bt_navigator",
+      "sec": 262.252602592
+    },
+    {
+      "level": 20,
+      "message": "Destroying bond (collision_monitor) to lifecycle manager.",
+      "name": "collision_monitor",
+      "sec": 262.45601883800003
+    },
+    {
+      "level": 20,
+      "message": "Message Filter dropping message: frame 'base_link' at time 1779266540.282 for reason 'the timestamp on the message is earlier than all the data in the transform cache'",
+      "name": "global_costmap.global_costmap",
+      "sec": 263.99860141100004
+    }
+  ],
+  "last_adapter_stop_reason": "none",
+  "last_rosout_key": {
+    "level": 20,
+    "message": "Goal canceled",
+    "name": "bt_navigator",
+    "sec": 262.252602592
+  },
+  "missing_evidence": [],
+  "profile": "nav-full",
+  "run_id": "2026-05-20-nav-163754",
+  "safe_cmd_suppressed": true,
+  "summary_error": null,
+  "suspected_upstream_cause": "controller/progress failure; verify odom, AMCL stability, and RPP tracking inputs",
+  "terminal_chassis_stall": false,
+  "timeline": {
+    "first_ackermann_nonzero_sec": 36.890006247,
+    "first_adapter_stop_reason": "input_timeout",
+    "first_adapter_stop_reason_sec": 1.077163852,
+    "first_chassis_brake_active_sec": 1.117832274,
+    "first_chassis_command_timeout_sec": 0.276769039,
+    "first_chassis_motion_sec": 18.316054495,
+    "first_chassis_rc_override_active_sec": 0.276769039,
+    "first_cmd_vel_nav_sec": 36.185077637,
+    "first_goal_active_sec": 35.541680181000004,
+    "first_goal_terminal_sec": 53.462597551,
+    "first_nav2_cmd_vel_nonzero_sec": 36.215977738,
+    "first_plan_pose_count": 295,
+    "first_plan_sec": 36.170912728000005,
+    "first_safe_cmd_suppressed_sec": 52.456926796000005,
+    "first_safe_nav2_cmd_vel_nonzero_sec": 36.257043685,
+    "goal_active_sec": 35.541680181000004,
+    "goal_active_statuses": [
+      "executing"
+    ],
+    "goal_terminal_sec": 262.25203168900003,
+    "goal_terminal_statuses": [
+      "aborted",
+      "aborted",
+      "aborted"
+    ]
+  },
+  "topic_stats": {
+    "/ackermann_cmd": {
+      "count": 3774,
+      "first_sec": 1.071204752,
+      "last_sec": 262.19223551100004
+    },
+    "/amcl_pose": {
+      "count": 82,
+      "first_sec": 8.700051388,
+      "last_sec": 248.235050548
+    },
+    "/behavior_tree_log": {
+      "count": 11,
+      "first_sec": 35.543500337000005,
+      "last_sec": 224.204020973
+    },
+    "/chassis_state": {
+      "count": 5240,
+      "first_sec": 0.276769039,
+      "last_sec": 262.213749308
+    },
+    "/cmd_vel_nav": {
+      "count": 2307,
+      "first_sec": 36.185077637,
+      "last_sec": 262.40286585
+    },
+    "/global_costmap/costmap": {
+      "count": 163,
+      "first_sec": 10.788861054,
+      "last_sec": 261.772888812
+    },
+    "/global_costmap/published_footprint": {
+      "count": 252,
+      "first_sec": 10.770981667000001,
+      "last_sec": 261.75846292700004
+    },
+    "/imu/data": {
+      "count": 26192,
+      "first_sec": 0.316979004,
+      "last_sec": 262.21704558600004
+    },
+    "/local_costmap/costmap": {
+      "count": 429,
+      "first_sec": 5.003438174,
+      "last_sec": 261.80244777
+    },
+    "/local_costmap/published_footprint": {
+      "count": 1287,
+      "first_sec": 5.002777246,
+      "last_sec": 262.202566887
+    },
+    "/lookahead_collision_arc": {
+      "count": 2305,
+      "first_sec": 36.185087705,
+      "last_sec": 262.195841828
+    },
+    "/lookahead_point": {
+      "count": 2305,
+      "first_sec": 36.185051619,
+      "last_sec": 262.195756421
+    },
+    "/map": {
+      "count": 1,
+      "first_sec": 1.114606148,
+      "last_sec": 1.114606148
+    },
+    "/nav2_cmd_vel": {
+      "count": 2344,
+      "first_sec": 36.215977738,
+      "last_sec": 262.22038600400003
+    },
+    "/navigate_to_pose/_action/feedback": {
+      "count": 11607,
+      "first_sec": 35.543602629,
+      "last_sec": 262.224382513
+    },
+    "/navigate_to_pose/_action/status": {
+      "count": 6,
+      "first_sec": 35.541680181000004,
+      "last_sec": 262.25203168900003
+    },
+    "/odom": {
+      "count": 7855,
+      "first_sec": 0.3507947,
+      "last_sec": 262.217622021
+    },
+    "/plan": {
+      "count": 3,
+      "first_sec": 36.170912728000005,
+      "last_sec": 224.18208022500002
+    },
+    "/received_global_plan": {
+      "count": 2305,
+      "first_sec": 36.185067623,
+      "last_sec": 262.19581535500004
+    },
+    "/rosout": {
+      "count": 346,
+      "first_sec": 0.0,
+      "last_sec": 268.61312679900004
+    },
+    "/safe_nav2_cmd_vel": {
+      "count": 2343,
+      "first_sec": 36.257043685,
+      "last_sec": 262.190414476
+    },
+    "/scan": {
+      "count": 5014,
+      "first_sec": 0.739349565,
+      "last_sec": 262.18111433800004
+    },
+    "/tf": {
+      "count": 12724,
+      "first_sec": 0.350817798,
+      "last_sec": 262.217666233
+    },
+    "/tf_static": {
+      "count": 3,
+      "first_sec": 0.17611206000000001,
+      "last_sec": 0.36132967600000004
+    },
+    "/twist_to_ackermann/diagnostics": {
+      "count": 4955,
+      "first_sec": 1.077163852,
+      "last_sec": 262.193282241
+    },
+    "/wheel_odom": {
+      "count": 5240,
+      "first_sec": 0.27723237100000003,
+      "last_sec": 262.21519396900004
+    }
+  }
+}

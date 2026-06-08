@@ -17,6 +17,8 @@ log/
 # Real-car acceptance raw outputs stay local; commit only distilled records.
 docs/test-records/logs/
 docs/test-records/rosbags/
+docs/test-records/artifacts/*/rosbags/
+docs/test-records/artifacts/*/logs/rosbag-record.log
 
 # Python
 __pycache__/

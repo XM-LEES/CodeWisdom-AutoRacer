@@ -17,13 +17,24 @@ artifact 目录:
 目标点:
 Nav2 参数文件:
 adapter 参数:
+最终启动入口:
+startup_preflight JSON:
+nav_capture 命令:
 topic graph / node info 证据:
 日志路径:
 rosbag 路径:
 checks JSON:
+first_failed_layer:
+suspected_upstream_cause:
+missing_evidence:
 
 注意：键盘、manual 或 legacy `/cmd_vel` 只能作为迁移/排障记录，不能作为阶段 4 PASS 证据。
 阶段 4A 是默认 PASS 范围；`reverse_plan_controlled` 是阶段 4B 扩展项，4A 通过时可记为 `未实现/4B 后续`，不得伪记为 PASS。
+最终启动优先使用 `tools/runtime/autoracer.sh nav --map docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml`；
+原始 stage launch 只作为研发、验收和排障展开入口。
+导航 abort 复现默认使用 `autoracer.sh nav` 的伴生采集。该采集只录制不发目标，默认不录 `/point_cloud_raw`；
+需要原始点云时使用 `tools/runtime/autoracer.sh nav ... --capture-raw-cloud`。
+正式 PASS 不得跳过启动前检查；`startup_preflight.json` 中有 FAIL 时只能记录 FAIL/BLOCKED。
 
 | Case | 自动检查 | 人工检查 | 证据文件 | 状态 |
 | --- | --- | --- | --- | --- |

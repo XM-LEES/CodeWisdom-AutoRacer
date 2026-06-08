@@ -69,6 +69,8 @@ def check_stage4_launch(repo_root: Path) -> None:
         "'input_topic': '/safe_nav2_cmd_vel'": "adapter must consume /safe_nav2_cmd_vel",
         "'output_topic': '/ackermann_cmd'": "adapter must publish /ackermann_cmd",
         "'diagnostics_topic': '/twist_to_ackermann/diagnostics'": "adapter diagnostics topic mismatch",
+        "'min_forward_drive_speed_mps': ParameterValue(LaunchConfiguration('min_forward_drive_speed_mps'), value_type=float)": "adapter forward crawl-speed guard must be launched",
+        "DeclareLaunchArgument('min_forward_drive_speed_mps', default_value='0.35')": "stage4 launch must default forward crawl-speed guard to 0.35 m/s",
         "start_chassis": "stage4 launch must allow non-hardware dry launch by disabling chassis",
         "start_imu": "stage4 launch must allow IMU dry-launch control",
         "start_robot_description": "stage4 launch must allow URDF/TF dry-launch control",
@@ -111,10 +113,12 @@ def check_nav2_params(repo_root: Path) -> None:
         'default_nav_to_pose_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_to_pose_goal_update_only.xml"': "stage4A must use a no-recovery NavigateToPose behavior tree",
         'default_nav_through_poses_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_through_poses_no_recovery.xml"': "stage4A must use local no-recovery NavigateThroughPoses behavior tree",
         'plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"': "controller must be RPP",
+        "required_movement_radius: 0.25": "stage4A progress checker must tolerate Ackermann low-speed startup lag",
+        "movement_time_allowance: 20.0": "stage4A progress checker timeout must tolerate STM32 PID startup lag",
         "xy_goal_tolerance: 0.35": "stage4A goal tolerance must match measured Ackermann localization accuracy",
-        "desired_linear_vel: 0.50": "stage4A target navigation speed must be 0.50 m/s",
-        "min_approach_linear_velocity: 0.18": "stage4A approach speed floor must stay above measured chassis crawl-stall region",
-        "regulated_linear_scaling_min_speed: 0.18": "stage4A regulated scaling speed floor must stay above measured chassis crawl-stall region",
+        "desired_linear_vel: 0.40": "stage4A target navigation speed must stay at the measured stable minimum",
+        "min_approach_linear_velocity: 0.35": "stage4A approach speed floor must stay above measured chassis crawl-stall region",
+        "regulated_linear_scaling_min_speed: 0.35": "stage4A regulated scaling speed floor must stay above measured chassis crawl-stall region",
         "allow_reversing: false": "stage4A must disable reversing",
         "use_rotate_to_heading: false": "RPP rotate-to-heading must be disabled for Ackermann",
         'plugin: "nav2_smac_planner/SmacPlannerHybrid"': "planner must be Smac Hybrid-A*",
@@ -122,7 +126,9 @@ def check_nav2_params(repo_root: Path) -> None:
         "minimum_turning_radius: 2.24": "minimum turning radius must be 2.24 m",
         "cmd_vel_in_topic: \"/nav2_cmd_vel\"": "Collision Monitor input topic mismatch",
         "cmd_vel_out_topic: \"/safe_nav2_cmd_vel\"": "Collision Monitor output topic mismatch",
-        "max_velocity: [0.50, 0.0, 0.60]": "stage4A velocity smoother must allow 0.50 m/s forward speed",
+        "max_velocity: [0.40, 0.0, 0.18]": "stage4A smoother must cap speed and yaw rate to the Ackermann live-test envelope",
+        "min_velocity: [0.0, 0.0, -0.18]": "stage4A smoother must cap negative yaw rate to the Ackermann live-test envelope",
+        "deadband_velocity: [0.34, 0.0, 0.0]": "stage4A velocity smoother must not pass crawl-stall forward speeds",
         "enable_stamped_cmd_vel: false": "Collision Monitor must use Twist for Humble adapter chain",
         "front_stop": "front stop zone missing",
         "front_slowdown": "front slowdown zone missing",
@@ -151,17 +157,20 @@ def check_nav2_reverse_params(repo_root: Path) -> None:
         'default_nav_to_pose_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_to_pose_goal_update_only.xml"': "4B must use a no-recovery NavigateToPose behavior tree",
         'default_nav_through_poses_bt_xml: "$(find-pkg-share autoracer_robot_nav2)/behavior_trees/stage4_navigate_through_poses_no_recovery.xml"': "4B must use local no-recovery NavigateThroughPoses behavior tree",
         'plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"': "4B controller must be RPP",
+        "required_movement_radius: 0.25": "4B progress checker must tolerate Ackermann low-speed startup lag",
+        "movement_time_allowance: 20.0": "4B progress checker timeout must tolerate STM32 PID startup lag",
         "xy_goal_tolerance: 0.35": "4B goal tolerance must match measured Ackermann localization accuracy",
-        "desired_linear_vel: 0.50": "4B target navigation speed must be 0.50 m/s",
-        "min_approach_linear_velocity: 0.18": "4B approach speed floor must stay above measured chassis crawl-stall region",
-        "regulated_linear_scaling_min_speed: 0.18": "4B regulated scaling speed floor must stay above measured chassis crawl-stall region",
+        "desired_linear_vel: 0.40": "4B target navigation speed must stay at the measured stable minimum",
+        "min_approach_linear_velocity: 0.35": "4B approach speed floor must stay above measured chassis crawl-stall region",
+        "regulated_linear_scaling_min_speed: 0.35": "4B regulated scaling speed floor must stay above measured chassis crawl-stall region",
         "allow_reversing: true": "4B RPP must explicitly allow controlled reversing",
         "use_rotate_to_heading: false": "4B must still disable rotate-to-heading for Ackermann",
         'plugin: "nav2_smac_planner/SmacPlannerHybrid"': "4B planner must be Smac Hybrid-A*",
         'motion_model_for_search: "REEDS_SHEPP"': "4B planner must use REEDS_SHEPP for controlled reverse segments",
         "minimum_turning_radius: 2.24": "4B minimum turning radius must stay at 2.24 m",
-        "max_velocity: [0.50, 0.0, 0.60]": "4B velocity smoother must allow 0.50 m/s forward speed",
-        "min_velocity: [-0.30, 0.0, -0.60]": "4B velocity smoother must allow conservative reverse vx",
+        "max_velocity: [0.40, 0.0, 0.18]": "4B smoother must cap speed and yaw rate to the Ackermann live-test envelope",
+        "min_velocity: [-0.40, 0.0, -0.18]": "4B smoother must cap negative yaw rate to the Ackermann live-test envelope",
+        "deadband_velocity: [0.34, 0.0, 0.0]": "4B velocity smoother must not pass crawl-stall forward speeds",
         "cmd_vel_in_topic: \"/nav2_cmd_vel\"": "4B Collision Monitor input topic mismatch",
         "cmd_vel_out_topic: \"/safe_nav2_cmd_vel\"": "4B Collision Monitor output topic mismatch",
         "front_stop": "4B front stop zone missing",
@@ -215,8 +224,8 @@ def check_adapter_math(repo_root: Path) -> None:
     adapter = load_adapter(repo_root)
     config = adapter.AdapterConfig()
 
-    normal = adapter.compute_ackermann(0.30, 0.10, config)
-    require(math.isclose(normal.speed_mps, 0.30), "normal speed mismatch")
+    normal = adapter.compute_ackermann(0.40, 0.10, config)
+    require(math.isclose(normal.speed_mps, 0.40), "normal speed mismatch")
     require(normal.stop_reason == adapter.STOP_REASON_NONE, "normal command should not stop")
     require(not normal.brake, "normal command must not brake")
 
@@ -224,7 +233,12 @@ def check_adapter_math(repo_root: Path) -> None:
     require(math.isclose(limited.speed_mps, 1.0), "forward speed clamp mismatch")
     require(limited.speed_limited, "forward speed clamp must set speed_limited")
 
-    steering = adapter.compute_ackermann(0.10, 5.0, config)
+    crawl = adapter.compute_ackermann(0.30, 0.0, config)
+    require(crawl.stop_reason == adapter.STOP_REASON_CRAWL_SPEED and crawl.brake, "crawl-speed forward input must stop")
+    floor = adapter.compute_ackermann(0.35, 0.0, config)
+    require(floor.stop_reason == adapter.STOP_REASON_NONE, "0.35 m/s forward input must be allowed")
+
+    steering = adapter.compute_ackermann(0.40, 5.0, config)
     require(math.isclose(steering.steering_angle_rad, 0.262), "steering clamp mismatch")
     require(steering.steering_limited, "steering clamp must set steering_limited")
 
@@ -247,7 +261,12 @@ def check_adapter_math(repo_root: Path) -> None:
     require(math.isclose(reverse_limited.speed_mps, -0.60), "reverse clamp mismatch")
     require(reverse_limited.speed_limited, "reverse clamp must set speed_limited")
 
-    reverse_turn = adapter.compute_ackermann(-0.20, 0.10, reverse_config)
+    reverse_crawl = adapter.compute_ackermann(-0.30, 0.0, reverse_config)
+    require(reverse_crawl.stop_reason == adapter.STOP_REASON_CRAWL_SPEED, "crawl-speed reverse input must stop")
+    reverse_floor = adapter.compute_ackermann(-0.35, 0.0, reverse_config)
+    require(reverse_floor.stop_reason == adapter.STOP_REASON_NONE, "0.35 m/s reverse input must be allowed")
+
+    reverse_turn = adapter.compute_ackermann(-0.40, 0.10, reverse_config)
     require(reverse_turn.reverse, "reverse turn must set reverse flag")
     require(reverse_turn.stop_reason == adapter.STOP_REASON_NONE, "allowed reverse turn should not stop")
     require(reverse_turn.steering_angle_rad < 0.0, "positive yaw while reversing requires negative steering")
@@ -275,6 +294,7 @@ def check_adapter_diagnostics_contract(repo_root: Path) -> None:
         "input_timeout",
         "infeasible_spin",
         "reverse_disabled",
+        "below_min_drive_speed",
     ):
         require_text(text, reason, f"adapter must define stop_reason={reason}")
 

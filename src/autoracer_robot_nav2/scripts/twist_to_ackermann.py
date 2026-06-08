@@ -13,6 +13,7 @@ STOP_REASON_INVALID = "invalid_input"
 STOP_REASON_TIMEOUT = "input_timeout"
 STOP_REASON_INFEASIBLE_SPIN = "infeasible_spin"
 STOP_REASON_REVERSE_DISABLED = "reverse_disabled"
+STOP_REASON_CRAWL_SPEED = "below_min_drive_speed"
 
 STOP_REASONS = {
     STOP_REASON_NONE,
@@ -21,6 +22,7 @@ STOP_REASONS = {
     STOP_REASON_TIMEOUT,
     STOP_REASON_INFEASIBLE_SPIN,
     STOP_REASON_REVERSE_DISABLED,
+    STOP_REASON_CRAWL_SPEED,
 }
 
 
@@ -30,6 +32,8 @@ class AdapterConfig:
     max_steering_angle_rad: float = 0.262
     max_auto_speed_mps: float = 1.00
     max_reverse_speed_mps: float = 0.60
+    min_forward_drive_speed_mps: float = 0.35
+    min_reverse_drive_speed_mps: float = 0.35
     min_turn_speed_mps: float = 0.05
     angular_deadband_radps: float = 0.02
     allow_reverse: bool = False
@@ -89,6 +93,12 @@ def compute_ackermann(vx: float, wz: float, config: AdapterConfig) -> AdapterOut
     if reverse and not config.allow_reverse:
         return stop_output(config, STOP_REASON_REVERSE_DISABLED, reverse=True)
 
+    if not reverse and 0.0 < vx < config.min_forward_drive_speed_mps:
+        return stop_output(config, STOP_REASON_CRAWL_SPEED)
+
+    if reverse and 0.0 < abs(vx) < config.min_reverse_drive_speed_mps:
+        return stop_output(config, STOP_REASON_CRAWL_SPEED, reverse=True)
+
     if reverse:
         speed, speed_limited = clamp(vx, -config.max_reverse_speed_mps, 0.0)
     else:
@@ -144,6 +154,8 @@ class TwistToAckermannNode:
         self.node.declare_parameter("max_steering_angle_rad", 0.262)
         self.node.declare_parameter("max_auto_speed_mps", 1.00)
         self.node.declare_parameter("max_reverse_speed_mps", 0.60)
+        self.node.declare_parameter("min_forward_drive_speed_mps", 0.35)
+        self.node.declare_parameter("min_reverse_drive_speed_mps", 0.35)
         self.node.declare_parameter("min_turn_speed_mps", 0.05)
         self.node.declare_parameter("angular_deadband_radps", 0.02)
         self.node.declare_parameter("allow_reverse", False)
@@ -177,6 +189,8 @@ class TwistToAckermannNode:
             max_steering_angle_rad=float(self.node.get_parameter("max_steering_angle_rad").value),
             max_auto_speed_mps=float(self.node.get_parameter("max_auto_speed_mps").value),
             max_reverse_speed_mps=float(self.node.get_parameter("max_reverse_speed_mps").value),
+            min_forward_drive_speed_mps=float(self.node.get_parameter("min_forward_drive_speed_mps").value),
+            min_reverse_drive_speed_mps=float(self.node.get_parameter("min_reverse_drive_speed_mps").value),
             min_turn_speed_mps=float(self.node.get_parameter("min_turn_speed_mps").value),
             angular_deadband_radps=float(self.node.get_parameter("angular_deadband_radps").value),
             allow_reverse=bool(self.node.get_parameter("allow_reverse").value),

@@ -1,0 +1,283 @@
+{
+  "ackermann_nonzero_observed": true,
+  "bag_path": "docs/test-records/artifacts/2026-05-20-nav-153715/rosbags/2026-05-20-nav-153715",
+  "capture_mode": "session",
+  "chassis_motion_observed": true,
+  "chassis_safety_observed": {
+    "brake_active": true,
+    "command_timeout": true,
+    "estop_active": false,
+    "rc_override_active": true
+  },
+  "created_at": "2026-05-20T16:09:50",
+  "evidence": [
+    "terminal window had nonzero /ackermann_cmd while /chassis_state stayed stopped",
+    "progress checker abort followed the chassis stall"
+  ],
+  "first_failed_layer": "chassis",
+  "goal_events": [
+    {
+      "goal_id": "ec2f41a9c985e7315136be24904af342",
+      "sec": 65.858882097,
+      "status": "executing",
+      "status_code": 2
+    },
+    {
+      "goal_id": "ec2f41a9c985e7315136be24904af342",
+      "sec": 131.920880532,
+      "status": "aborted",
+      "status_code": 6
+    },
+    {
+      "goal_id": "031eeafaf2a7a9f05dd920440c85dac4",
+      "sec": 207.35061489400002,
+      "status": "executing",
+      "status_code": 2
+    },
+    {
+      "goal_id": "031eeafaf2a7a9f05dd920440c85dac4",
+      "sec": 223.131313239,
+      "status": "aborted",
+      "status_code": 6
+    }
+  ],
+  "key_rosout_tail": [
+    {
+      "level": 30,
+      "message": "Failed to transform initial pose in time (Lookup would require extrapolation into the future.  Requested time 1779262833.688024 but the latest data is at time 1779262833.652024, when looking up transform from frame [base_footprint] to frame [odom])",
+      "name": "amcl",
+      "sec": 194.628374232
+    },
+    {
+      "level": 20,
+      "message": "Message Filter dropping message: frame 'base_link' at time 1779262844.747 for reason 'the timestamp on the message is earlier than all the data in the transform cache'",
+      "name": "global_costmap.global_costmap",
+      "sec": 205.99727421300003
+    },
+    {
+      "level": 20,
+      "message": "Received a goal, begin computing control effort.",
+      "name": "controller_server",
+      "sec": 207.402033485
+    },
+    {
+      "level": 40,
+      "message": "Failed to make progress",
+      "name": "controller_server",
+      "sec": 223.102359983
+    },
+    {
+      "level": 30,
+      "message": "[follow_path] [ActionServer] Aborting handle.",
+      "name": "controller_server",
+      "sec": 223.10243777500003
+    },
+    {
+      "level": 30,
+      "message": "[navigate_to_pose] [ActionServer] Aborting handle.",
+      "name": "bt_navigator",
+      "sec": 223.131189094
+    },
+    {
+      "level": 40,
+      "message": "Goal failed",
+      "name": "bt_navigator",
+      "sec": 223.13130301700002
+    },
+    {
+      "level": 20,
+      "message": "Destroying bond (collision_monitor) to lifecycle manager.",
+      "name": "collision_monitor",
+      "sec": 237.239842344
+    },
+    {
+      "level": 20,
+      "message": "Destroying bond (collision_monitor) to lifecycle manager.",
+      "name": "collision_monitor",
+      "sec": 237.40582085900002
+    },
+    {
+      "level": 20,
+      "message": "Message Filter dropping message: frame 'base_link' at time 1779262876.261 for reason 'the timestamp on the message is earlier than all the data in the transform cache'",
+      "name": "global_costmap.global_costmap",
+      "sec": 237.51317877500003
+    }
+  ],
+  "last_adapter_stop_reason": "input_timeout",
+  "last_rosout_key": {
+    "level": 40,
+    "message": "Goal failed",
+    "name": "bt_navigator",
+    "sec": 223.13130301700002
+  },
+  "missing_evidence": [],
+  "profile": "nav-full",
+  "run_id": "2026-05-20-nav-153715",
+  "safe_cmd_suppressed": true,
+  "summary_error": null,
+  "suspected_upstream_cause": "low-speed chassis stall: command reached STM32, but Hall/actual speed stayed zero before abort",
+  "terminal_chassis_stall": true,
+  "timeline": {
+    "first_ackermann_nonzero_sec": 66.06537011200001,
+    "first_adapter_stop_reason": "input_timeout",
+    "first_adapter_stop_reason_sec": 1.00833171,
+    "first_chassis_brake_active_sec": 1.18609904,
+    "first_chassis_command_timeout_sec": 0.586047145,
+    "first_chassis_motion_sec": 4.085859056,
+    "first_chassis_rc_override_active_sec": 0.586047145,
+    "first_cmd_vel_nav_sec": 65.94335934,
+    "first_goal_active_sec": 65.858882097,
+    "first_goal_terminal_sec": 131.920880532,
+    "first_nav2_cmd_vel_nonzero_sec": 65.97372016700001,
+    "first_plan_pose_count": 160,
+    "first_plan_sec": 65.920806763,
+    "first_safe_cmd_suppressed_sec": 75.165889929,
+    "first_safe_nav2_cmd_vel_nonzero_sec": 66.00455913900001,
+    "goal_active_sec": 65.858882097,
+    "goal_active_statuses": [
+      "executing"
+    ],
+    "goal_terminal_sec": 223.131313239,
+    "goal_terminal_statuses": [
+      "aborted",
+      "aborted"
+    ],
+    "terminal_ack_speed_mps": 0.18000000715255737,
+    "terminal_ack_steering_angle_rad": -0.2619999945163727,
+    "terminal_chassis_actual_speed_mps": 0.0,
+    "terminal_chassis_stall_sec": 131.920880532,
+    "terminal_chassis_status_bits": 2337
+  },
+  "topic_stats": {
+    "/ackermann_cmd": {
+      "count": 3190,
+      "first_sec": 1.007797957,
+      "last_sec": 237.19892529400002
+    },
+    "/amcl_pose": {
+      "count": 60,
+      "first_sec": 47.909454914,
+      "last_sec": 213.113758116
+    },
+    "/behavior_tree_log": {
+      "count": 8,
+      "first_sec": 65.861254621,
+      "last_sec": 223.12119101200003
+    },
+    "/chassis_state": {
+      "count": 4734,
+      "first_sec": 0.586047145,
+      "last_sec": 237.23213822300002
+    },
+    "/cmd_vel_nav": {
+      "count": 1636,
+      "first_sec": 65.94335934,
+      "last_sec": 237.43105678
+    },
+    "/global_costmap/costmap": {
+      "count": 121,
+      "first_sec": 50.062424082,
+      "last_sec": 237.05030430000002
+    },
+    "/global_costmap/published_footprint": {
+      "count": 188,
+      "first_sec": 50.044445469,
+      "last_sec": 237.03296901700003
+    },
+    "/imu/data": {
+      "count": 23673,
+      "first_sec": 0.611271407,
+      "last_sec": 237.23206838800002
+    },
+    "/local_costmap/costmap": {
+      "count": 387,
+      "first_sec": 5.229151575,
+      "last_sec": 236.82855731
+    },
+    "/local_costmap/published_footprint": {
+      "count": 1161,
+      "first_sec": 5.228037298,
+      "last_sec": 237.22808495700002
+    },
+    "/lookahead_collision_arc": {
+      "count": 1633,
+      "first_sec": 65.94300487800001,
+      "last_sec": 223.05232690000003
+    },
+    "/lookahead_point": {
+      "count": 1633,
+      "first_sec": 65.942983233,
+      "last_sec": 223.052313924
+    },
+    "/map": {
+      "count": 1,
+      "first_sec": 2.067543374,
+      "last_sec": 2.067543374
+    },
+    "/nav2_cmd_vel": {
+      "count": 1673,
+      "first_sec": 65.97372016700001,
+      "last_sec": 224.078226394
+    },
+    "/navigate_to_pose/_action/feedback": {
+      "count": 8184,
+      "first_sec": 65.862561915,
+      "last_sec": 223.121280646
+    },
+    "/navigate_to_pose/_action/status": {
+      "count": 4,
+      "first_sec": 65.858882097,
+      "last_sec": 223.131313239
+    },
+    "/odom": {
+      "count": 7095,
+      "first_sec": 0.7690973680000001,
+      "last_sec": 237.22904553900003
+    },
+    "/plan": {
+      "count": 2,
+      "first_sec": 65.920806763,
+      "last_sec": 207.387322245
+    },
+    "/received_global_plan": {
+      "count": 1633,
+      "first_sec": 65.942830489,
+      "last_sec": 223.052321282
+    },
+    "/rosout": {
+      "count": 464,
+      "first_sec": 0.0,
+      "last_sec": 239.61146811400002
+    },
+    "/safe_nav2_cmd_vel": {
+      "count": 1673,
+      "first_sec": 66.00455913900001,
+      "last_sec": 224.09894075900002
+    },
+    "/scan": {
+      "count": 4529,
+      "first_sec": 1.257427284,
+      "last_sec": 237.21302946100002
+    },
+    "/tf": {
+      "count": 10695,
+      "first_sec": 0.762562944,
+      "last_sec": 237.23046570300002
+    },
+    "/tf_static": {
+      "count": 3,
+      "first_sec": 0.021681522,
+      "last_sec": 0.08919112400000001
+    },
+    "/twist_to_ackermann/diagnostics": {
+      "count": 4036,
+      "first_sec": 1.00833171,
+      "last_sec": 237.19927839200002
+    },
+    "/wheel_odom": {
+      "count": 4733,
+      "first_sec": 0.641912448,
+      "last_sec": 237.232342708
+    }
+  }
+}

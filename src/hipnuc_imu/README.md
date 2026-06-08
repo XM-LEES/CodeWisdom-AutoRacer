@@ -18,18 +18,15 @@ N300 Pro IMU ROS2 驱动包（超核电子 HI13 芯片）。
 # config/hipnuc_config.yaml
 IMU_publisher:
     ros__parameters:
-        serial_port: "/dev/autoracer_imu"  # udev 符号链接
+        serial_port: "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_0003-if00-port0"
         baud_rate: 115200
         frame_id: "gyro_link"
         imu_topic: "/imu/data_raw"
 ```
 
-## udev 规则
+## 设备名
 
-```bash
-# /etc/udev/rules.d/autoracer_imu.rules
-KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0003", MODE:="0777", GROUP:="dialout", SYMLINK+="autoracer_imu"
-```
+默认使用 Linux 的稳定 by-id 设备名，不依赖额外 udev 符号链接。
 
 ## 运行
 

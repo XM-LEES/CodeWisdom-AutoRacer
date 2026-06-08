@@ -4,6 +4,15 @@
 
 从 `CodeWisdom-AutoRacer/` 仓库根目录执行。
 
+最终现场启动和导航采集不放在本目录：
+
+| 路径 | 作用 |
+| --- | --- |
+| `tools/runtime/autoracer.sh` | 最终用户入口，只暴露 `map` 建图和 `nav` 导航两个任务，默认启动前检查，`nav` 默认伴生只读采集，底层复用 stage3/stage4 launch。 |
+| `tools/diagnostics/nav_capture.py` | 只读采集导航会话，生成 rosbag、`preflight.json` 和 `post_summary.json`，用于分层定位 abort。 |
+
+阶段 1-4 的脚本仍是研发、验收和排障入口，不是最终日常启动界面。
+
 ## 文件说明
 
 | 路径 | 作用 | 是否会让车运动 |

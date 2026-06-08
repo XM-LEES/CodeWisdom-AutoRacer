@@ -60,22 +60,34 @@ ros2 launch autoracer_robot_nav2 save_map.launch.py \
 ros2 launch lslidar_driver lslidar_cx_launch.py
 
 # 2. 启动当前过渡 Nav2 入口（加载地图）；不能作为阶段 4 稳定版 PASS 证据
-ros2 launch autoracer_robot_nav2 navigation.launch.py map:=/path/to/autoracer_map.yaml
+ros2 launch autoracer_robot_nav2 navigation.launch.py map:=docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml
 
 # 3. 在 RViz2 中设置初始位姿和目标点
 ```
 
-阶段 4 稳定版入口：
+最终导航入口优先使用任务脚本：
 
 ```bash
-ros2 launch autoracer_bringup stage4_navigation.launch.py map:=/path/to/map.yaml counts_per_meter:=<实测值>
+tools/runtime/autoracer.sh nav --map docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml
 ```
 
-阶段 4B 受控倒车离线/上车候选入口：
+阶段 4 稳定版 launch 作为研发、验收和排障展开入口：
+
+```bash
+ros2 launch autoracer_bringup stage4_navigation.launch.py map:=docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml counts_per_meter:=<实测值>
+```
+
+阶段 4B 受控倒车离线/上车候选入口优先使用：
+
+```bash
+tools/runtime/autoracer.sh nav --map docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml --reverse
+```
+
+等价展开命令：
 
 ```bash
 ros2 launch autoracer_bringup stage4_navigation.launch.py \
-  map:=/path/to/map.yaml \
+  map:=docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml \
   counts_per_meter:=<实测值> \
   params_file:=$(ros2 pkg prefix autoracer_robot_nav2)/share/autoracer_robot_nav2/param/stage4_nav2_reverse_params.yaml \
   allow_reverse:=true
@@ -98,9 +110,11 @@ python3 tools/acceptance/stage4_navigation_contract_check.py
 | min_turning_radius | 2.24m | 最小转弯半径 |
 | motion_model | Ackermann | 阶段 4A 通过 Smac Dubin + RPP + adapter 实现 forward-only |
 | planner | SmacPlannerHybrid | 阶段 4A 使用 Dubin/forward-only |
-| controller | Regulated Pure Pursuit | Nav2 内部输出 `/nav2_cmd_vel` |
+| controller | Regulated Pure Pursuit | `desired_linear_vel=0.40m/s` |
 | goal_tolerance | `xy=0.35m`, `yaw=0.35rad` | 阶段 4A 当前实车容差 |
-| min_approach_speed | `0.18m/s` | 避免低速爬行区停车 |
+| min_approach_speed | `0.35m/s` | 避免进入实车低速阻力推不动区 |
+| progress_checker | `0.25m / 20s` | 容忍满舵低速时 STM32 PID 起扭矩延迟 |
+| velocity_smoother | `vx<=0.40m/s`, `abs(wz)<=0.18rad/s` | 限制到 Ackermann 最大转角可执行范围 |
 | adapter | `twist_to_ackermann` | `/safe_nav2_cmd_vel -> /ackermann_cmd` |
 | footprint | 0.8775m × 0.57m | 车身碰撞轮廓 |
 | stage4_reverse_params | `stage4_nav2_reverse_params.yaml` | 4B 候选，`REEDS_SHEPP` + RPP `allow_reversing=true` |

@@ -1,0 +1,127 @@
+{
+  "capture_enabled": true,
+  "capture_raw_cloud": false,
+  "counts": "13.545",
+  "created_at": "2026-05-20T16:44:35",
+  "launch_overrides": {
+    "counts_per_meter": "13.545",
+    "map": "docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml",
+    "use_rviz": "true"
+  },
+  "map": "docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml",
+  "mode": "nav",
+  "passed": true,
+  "results": [
+    {
+      "detail": "runtime source script exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/source_all.sh",
+      "name": "source_all",
+      "status": "PASS"
+    },
+    {
+      "detail": "workspace setup exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/install/setup.bash",
+      "name": "workspace_setup",
+      "status": "PASS"
+    },
+    {
+      "detail": "13.545",
+      "name": "counts_per_meter",
+      "status": "PASS"
+    },
+    {
+      "detail": "187.5 GB free at /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/docs/test-records/artifacts",
+      "name": "artifact_disk_space",
+      "status": "PASS"
+    },
+    {
+      "detail": "map yaml exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.yaml",
+      "name": "map_yaml",
+      "status": "PASS"
+    },
+    {
+      "detail": "map image exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/docs/test-records/maps/stage3-final-floor2-loop-20260517-101119.pgm",
+      "name": "map_image",
+      "status": "PASS"
+    },
+    {
+      "detail": "/home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/install/autoracer_bringup",
+      "name": "package:autoracer_bringup",
+      "status": "PASS"
+    },
+    {
+      "detail": "/home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/install/autoracer_robot_nav2",
+      "name": "package:autoracer_robot_nav2",
+      "status": "PASS"
+    },
+    {
+      "detail": "/home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/install/hipnuc_imu",
+      "name": "package:hipnuc_imu",
+      "status": "PASS"
+    },
+    {
+      "detail": "/opt/ros/humble",
+      "name": "package:imu_filter_madgwick",
+      "status": "PASS"
+    },
+    {
+      "detail": "/home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/install/lslidar_driver",
+      "name": "package:lslidar_driver",
+      "status": "PASS"
+    },
+    {
+      "detail": "/opt/ros/humble",
+      "name": "package:nav2_bringup",
+      "status": "PASS"
+    },
+    {
+      "detail": "/opt/ros/humble",
+      "name": "package:nav2_collision_monitor",
+      "status": "PASS"
+    },
+    {
+      "detail": "/opt/ros/humble",
+      "name": "package:pointcloud_to_laserscan",
+      "status": "PASS"
+    },
+    {
+      "detail": "/home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/install/turn_on_autoracer_robot",
+      "name": "package:turn_on_autoracer_robot",
+      "status": "PASS"
+    },
+    {
+      "detail": "device ready: /dev/ttyACM0",
+      "name": "chassis_serial",
+      "status": "PASS"
+    },
+    {
+      "detail": "IMU config exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/src/hipnuc_imu/config/hipnuc_config.yaml",
+      "name": "imu_config",
+      "status": "PASS"
+    },
+    {
+      "detail": "device ready: /dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_0003-if00-port0",
+      "name": "imu_serial",
+      "status": "PASS"
+    },
+    {
+      "detail": "LiDAR params exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/src/autoracer_lidar_ros2/lslidar_ros/lslidar_driver/params/lslidar_cx.yaml",
+      "name": "lidar_params",
+      "status": "PASS"
+    },
+    {
+      "detail": "local 192.168.1.x address found",
+      "name": "lidar_local_network",
+      "status": "PASS"
+    },
+    {
+      "detail": "LiDAR responds at 192.168.1.200",
+      "name": "lidar_ping",
+      "status": "PASS"
+    },
+    {
+      "detail": "Nav2 params exists: /home/asshole/Desktop/New Folder/CodeWisdom-AutoRacer/src/autoracer_robot_nav2/param/stage4_nav2_params.yaml",
+      "name": "nav2_params",
+      "status": "PASS"
+    }
+  ],
+  "run_id": "2026-05-20-nav-164432"
+}
